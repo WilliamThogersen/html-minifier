@@ -9,11 +9,8 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        target: [x86_64-unknown-linux-gnu, x86_64-apple-darwin]
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
@@ -21,6 +18,7 @@ jobs:
           - target: x86_64-apple-darwin
             os: macos-latest
             artifact_name: libhtml_minifier_ffi.dylib
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v4
