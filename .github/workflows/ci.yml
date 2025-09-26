@@ -24,7 +24,7 @@ jobs:
       run: composer update --prefer-dist --no-progress
 
     - name: Run PHPStan
-      run: ./vendor/bin/phpstan analyse src --level=5 --no-progress
+      run: ./vendor/bin/phpstan analyse --no-progress
 
     - name: Run PHP_CodeSniffer
       run: ./vendor/bin/phpcs src --standard=PSR12

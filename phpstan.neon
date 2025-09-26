@@ -1,0 +1,8 @@
+parameters:
+    level: 5
+    paths:
+        - src
+    ignoreErrors:
+        # Ignore FFI method calls since they're dynamically loaded
+        - '#Call to an undefined method FFI::(minify_html_string|free_string)\(\)#'
+    checkMissingIterableValueType: false
