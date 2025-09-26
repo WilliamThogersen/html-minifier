@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Wexowgt\Minifier;
 
@@ -24,7 +26,7 @@ class HTMLMinifier
             if ($libraryPath === null) {
                 $libraryPath = self::detectLibraryPath();
             }
-            self::$instance = 
+            self::$instance =
             new self($libraryPath);
         }
         return self::$instance;
@@ -37,9 +39,9 @@ class HTMLMinifier
 
         $extensions = [];
         if (PHP_OS_FAMILY === 'Darwin') {
-            $extensions = ['dylib', 'so']; // 
+            $extensions = ['dylib', 'so']; //
         } elseif (PHP_OS_FAMILY === 'Linux') {
-            $extensions = ['so', 'dylib']; // 
+            $extensions = ['so', 'dylib']; //
         } else {
             $extensions = ['dll', 'so', 'dylib'];
         }
