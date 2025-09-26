@@ -21,13 +21,7 @@ jobs:
         extensions: ffi
 
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
-
-    - name: Install PHPStan
-      run: composer require --dev phpstan/phpstan
-
-    - name: Install PHP_CodeSniffer
-      run: composer require --dev squizlabs/php_codesniffer
+      run: composer update --prefer-dist --no-progress
 
     - name: Run PHPStan
       run: ./vendor/bin/phpstan analyse src --level=5 --no-progress

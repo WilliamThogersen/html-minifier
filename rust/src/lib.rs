@@ -6,25 +6,65 @@ use std::os::raw::c_char;
 // =============================================================================
 
 const SINGLETON_ELEMENTS: &[&str] = &[
-    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta",
-    "param", "source", "track", "wbr"
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source",
+    "track", "wbr",
 ];
 
 const CLOSE_OPTIONAL_ELEMENTS: &[&str] = &[
-    "p", "dt", "dd", "li", "option", "thead", "th", "tbody", "tr", "td", "tfoot", "colgroup"
+    "p", "dt", "dd", "li", "option", "thead", "th", "tbody", "tr", "td", "tfoot", "colgroup",
 ];
 
 const BOOLEAN_ATTRIBUTES: &[&str] = &[
-    "allowfullscreen", "async", "autofocus", "autoplay", "checked", "controls", "default",
-    "defer", "disabled", "formnovalidate", "hidden", "inert", "ismap", "itemscope", "loop",
-    "multiple", "muted", "nomodule", "novalidate", "open", "playsinline", "readonly",
-    "required", "reversed", "selected", "typemustmatch"
+    "allowfullscreen",
+    "async",
+    "autofocus",
+    "autoplay",
+    "checked",
+    "controls",
+    "default",
+    "defer",
+    "disabled",
+    "formnovalidate",
+    "hidden",
+    "inert",
+    "ismap",
+    "itemscope",
+    "loop",
+    "multiple",
+    "muted",
+    "nomodule",
+    "novalidate",
+    "open",
+    "playsinline",
+    "readonly",
+    "required",
+    "reversed",
+    "selected",
+    "typemustmatch",
 ];
 
 const EMPTY_REMOVABLE_ATTRIBUTES: &[&str] = &[
-    "id", "class", "style", "title", "action", "lang", "dir", "onfocus", "onblur",
-    "onchange", "onclick", "ondblclick", "onmousedown", "onmouseup", "onmouseover",
-    "onmousemove", "onmouseout", "onkeypress", "onkeydown", "onkeyup", "target"
+    "id",
+    "class",
+    "style",
+    "title",
+    "action",
+    "lang",
+    "dir",
+    "onfocus",
+    "onblur",
+    "onchange",
+    "onclick",
+    "ondblclick",
+    "onmousedown",
+    "onmouseup",
+    "onmouseover",
+    "onmousemove",
+    "onmouseout",
+    "onkeypress",
+    "onkeydown",
+    "onkeyup",
+    "target",
 ];
 
 // =============================================================================
@@ -84,9 +124,32 @@ fn should_remove_quotes(value: &str) -> bool {
     }
 
     !value.chars().any(|c| {
-        c.is_whitespace() || matches!(c, '"' | '\'' | '`' | '=' | '<' | '>' | '&' | '?' | '{' | '}' | '[' | ']' | '(' | ')' | ';' | ',' | '+')
+        c.is_whitespace()
+            || matches!(
+                c,
+                '"' | '\''
+                    | '`'
+                    | '='
+                    | '<'
+                    | '>'
+                    | '&'
+                    | '?'
+                    | '{'
+                    | '}'
+                    | '['
+                    | ']'
+                    | '('
+                    | ')'
+                    | ';'
+                    | ','
+                    | '+'
+            )
     }) && value.chars().all(|c| {
-        c.is_alphanumeric() || matches!(c, '-' | '_' | '.' | ':' | '/' | '#' | '@' | '%' | '!' | '*' | '~')
+        c.is_alphanumeric()
+            || matches!(
+                c,
+                '-' | '_' | '.' | ':' | '/' | '#' | '@' | '%' | '!' | '*' | '~'
+            )
     })
 }
 
@@ -126,8 +189,9 @@ impl<'a> Tokenizer<'a> {
         let start = self.position;
 
         while self.position < self.end {
-            if self.position + delimiter.len() <= self.end &&
-               &self.bytes[self.position..self.position + delimiter.len()] == delimiter {
+            if self.position + delimiter.len() <= self.end
+                && &self.bytes[self.position..self.position + delimiter.len()] == delimiter
+            {
                 let result = &self.input[start..self.position];
                 self.position += delimiter.len();
                 return result;
@@ -233,7 +297,10 @@ impl<'a> Tokenizer<'a> {
                 return Some(Token::TagOpenEnd);
             }
 
-            if self.position + 1 < self.end && self.bytes[self.position] == b'/' && self.bytes[self.position + 1] == b'>' {
+            if self.position + 1 < self.end
+                && self.bytes[self.position] == b'/'
+                && self.bytes[self.position + 1] == b'>'
+            {
                 self.position += 2;
                 self.in_tag = false;
                 return Some(Token::TagSelfClose);
@@ -274,7 +341,9 @@ impl<'a> Tokenizer<'a> {
             self.position += 2;
             let content = self.consume_until_bytes(b"-->");
             Some(Token::Comment(content))
-        } else if self.position + 7 < self.end && &self.bytes[self.position..self.position + 7] == b"DOCTYPE" {
+        } else if self.position + 7 < self.end
+            && &self.bytes[self.position..self.position + 7] == b"DOCTYPE"
+        {
             // Doctype
             let start = self.position - 2;
             let _content = self.consume_until_byte(b'>');
@@ -282,7 +351,9 @@ impl<'a> Tokenizer<'a> {
                 self.position += 1;
             }
             Some(Token::Doctype(&self.input[start..self.position]))
-        } else if self.position + 7 < self.end && &self.bytes[self.position..self.position + 7] == b"[CDATA[" {
+        } else if self.position + 7 < self.end
+            && &self.bytes[self.position..self.position + 7] == b"[CDATA["
+        {
             // CDATA
             self.position += 7;
             let content = self.consume_until_bytes(b"]]>");
@@ -385,8 +456,9 @@ pub fn minify_javascript(js: &str) -> String {
                     // Check if we need a space for separation
                     if let Some(&next_ch) = chars.peek() {
                         let last_ch = result.chars().last().unwrap_or(' ');
-                        if (last_ch.is_alphanumeric() || last_ch == '_') &&
-                           (next_ch.is_alphanumeric() || next_ch == '_') {
+                        if (last_ch.is_alphanumeric() || last_ch == '_')
+                            && (next_ch.is_alphanumeric() || next_ch == '_')
+                        {
                             result.push(' ');
                         }
                     }
@@ -619,10 +691,11 @@ fn process_attribute(result: &mut String, attr: &str, current_tag: &str) {
         let key = clean_attr[..eq_pos].trim().to_lowercase();
         let raw_value = clean_attr[eq_pos + 1..].trim();
 
-        let value = if raw_value.len() >= 2 &&
-                      ((raw_value.starts_with('"') && raw_value.ends_with('"')) ||
-                       (raw_value.starts_with('\'') && raw_value.ends_with('\''))) {
-            &raw_value[1..raw_value.len()-1]
+        let value = if raw_value.len() >= 2
+            && ((raw_value.starts_with('"') && raw_value.ends_with('"'))
+                || (raw_value.starts_with('\'') && raw_value.ends_with('\'')))
+        {
+            &raw_value[1..raw_value.len() - 1]
         } else {
             raw_value
         };
@@ -636,8 +709,9 @@ fn process_attribute(result: &mut String, attr: &str, current_tag: &str) {
 
         // Skip empty removable attributes
         if value.is_empty() {
-            if is_empty_removable(&key) ||
-               matches!(key.as_str(), "type" | "value" | "alt" | "title") {
+            if is_empty_removable(&key)
+                || matches!(key.as_str(), "type" | "value" | "alt" | "title")
+            {
                 return;
             }
         }
