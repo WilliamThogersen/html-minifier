@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, staging ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  php-quality:
+    runs-on: ubuntu-latest
+    name: PHP Code Quality
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: ffi
+
+    - name: Install dependencies
+      run: composer update --prefer-dist --no-progress
+
+    - name: Run PHPStan
+      run: ./vendor/bin/phpstan analyse --no-progress
+
+    - name: Run PHP_CodeSniffer
+      run: ./vendor/bin/phpcs src --standard=PSR12
+
+  rust-quality:
+    runs-on: ubuntu-latest
+    name: Rust Code Quality
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Cache cargo
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          rust/target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('rust/Cargo.lock') }}
+
+    - name: Check Rust formatting
+      working-directory: rust
+      run: cargo fmt -- --check
+
+    - name: Run Clippy (Rust linter)
+      working-directory: rust
+      run: cargo clippy -- -D clippy::correctness -D clippy::suspicious -D clippy::complexity
+
+    - name: Run Rust tests
+      working-directory: rust
+      run: cargo test

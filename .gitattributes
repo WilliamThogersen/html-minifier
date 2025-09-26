@@ -5,6 +5,7 @@ run.php export-ignore
 *.md export-ignore
 .gitignore export-ignore
 .gitattributes export-ignore
+*.sh export-ignore
 
 # Include only essential package files
 src/ export-include
