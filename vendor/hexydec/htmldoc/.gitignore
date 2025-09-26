@@ -1,6 +1,0 @@
-/workspace
-/vendor/
-/coverage
-/tests/cache
-/.phpunit.cache
-/.phpunit.result.cache

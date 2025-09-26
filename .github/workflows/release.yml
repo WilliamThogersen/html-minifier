@@ -1,0 +1,115 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            artifact_name: libhtml_minifier_ffi.so
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            artifact_name: libhtml_minifier_ffi.dylib
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: ${{ matrix.target }}
+
+    - name: Cache cargo
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          rust/target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('rust/Cargo.lock') }}
+
+    - name: Build Rust library
+      working-directory: rust
+      run: |
+        cargo build --release --target ${{ matrix.target }}
+
+    - name: Copy built library
+      run: |
+        if [[ "${{ matrix.target }}" == *"linux"* ]]; then
+          cp rust/target/${{ matrix.target }}/release/libhtml_minifier_ffi.so src/
+        else
+          cp rust/target/${{ matrix.target }}/release/libhtml_minifier_ffi.dylib src/
+        fi
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.target }}-binary
+        path: src/${{ matrix.artifact_name }}
+
+  package:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Get version from composer.json
+      id: version
+      run: |
+        VERSION=$(php -r "echo json_decode(file_get_contents('composer.json'))->version ?? '0.1.0';")
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION"
+
+    - name: Download Linux binary
+      uses: actions/download-artifact@v4
+      with:
+        name: x86_64-unknown-linux-gnu-binary
+        path: src/
+
+    - name: Download macOS binary
+      uses: actions/download-artifact@v4
+      with:
+        name: x86_64-apple-darwin-binary
+        path: src/
+
+    - name: Create release package
+      run: |
+        mkdir -p release-package
+        cp -r src/ release-package/
+        cp composer.json release-package/
+        cp LICENSE release-package/ 2>/dev/null || echo "LICENSE file not found, skipping"
+        cd release-package
+        zip -r ../html-minifier-${{ steps.version.outputs.version }}.zip .
+        cd ..
+
+    - name: Create Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release create ${{ github.ref_name }} \
+          --title "Release ${{ steps.version.outputs.version }}" \
+          --notes "Release ${{ steps.version.outputs.version }}
+
+        ## What's included:
+        - PHP wrapper (\`src/HTMLMinifier.php\`)
+        - Compiled Rust binaries for Linux and macOS
+        - Composer configuration
+
+        ## Installation:
+        \`\`\`bash
+        composer require wexowgt/minifier
+        \`\`\`" \
+          ./html-minifier-${{ steps.version.outputs.version }}.zip

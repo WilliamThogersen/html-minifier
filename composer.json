@@ -1,5 +1,6 @@
 {
     "name": "wexowgt/minifier",
+    "version": "1.0.0",
     "description": "Fast HTML minifier with Rust backend and PHP wrapper",
     "type": "library",
     "license": "MIT",
