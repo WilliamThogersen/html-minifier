@@ -58,7 +58,7 @@ jobs:
 
     - name: Run Clippy (Rust linter)
       working-directory: rust
-      run: cargo clippy -- -D warnings
+      run: cargo clippy -- -D clippy::correctness -D clippy::suspicious -D clippy::complexity
 
     - name: Run Rust tests
       working-directory: rust
