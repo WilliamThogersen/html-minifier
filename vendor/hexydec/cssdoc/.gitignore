@@ -1,0 +1,8 @@
+/workspace
+/node_modules
+/tools
+
+/vendor/
+/coverage
+/.phpunit.cache
+/.phpunit.result.cache

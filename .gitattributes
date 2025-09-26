@@ -1,0 +1,12 @@
+# Exclude Rust source and build artifacts from Composer package
+rust/ export-ignore
+cli/ export-ignore
+run.php export-ignore
+*.md export-ignore
+.gitignore export-ignore
+.gitattributes export-ignore
+
+# Include only essential package files
+src/ export-include
+composer.json export-include
+LICENSE export-include

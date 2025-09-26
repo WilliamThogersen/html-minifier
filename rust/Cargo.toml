@@ -1,0 +1,10 @@
+[package]
+name = "html_minifier_ffi"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "html_minifier_ffi"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]

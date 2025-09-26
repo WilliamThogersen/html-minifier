@@ -1,0 +1,25 @@
+{
+    "name": "wexowgt/minifier",
+    "description": "Fast HTML minifier with Rust backend and PHP wrapper",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["html", "minifier", "optimization", "performance"],
+    "autoload": {
+        "psr-4": {
+            "Wexowgt\\Minifier\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "William Gade Thøgersen"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "ext-ffi": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0 || ^10.0"
+    }
+}
+
